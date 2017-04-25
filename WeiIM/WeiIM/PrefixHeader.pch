@@ -1,0 +1,25 @@
+//
+//  PrefixHeader.pch
+//  WeiIM
+//
+//  Created by zhouMR on 2017/4/25.
+//  Copyright © 2017年 luowei. All rights reserved.
+//
+
+#ifndef PrefixHeader_pch
+#define PrefixHeader_pch
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#import <MJRefresh/MJRefresh.h>
+#import "YYKit.h"
+#import <MBProgressHUD/MBProgressHUD.h>
+#import "XMPPConfig.h"
+#import "Global.h"
+#import "UIImageView+SDWebImage.h"
+#import "XmppCenter.h"
+
+#import "VCBase.h"
+
+#endif /* PrefixHeader_pch */
