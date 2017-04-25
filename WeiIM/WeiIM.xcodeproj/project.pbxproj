@@ -20,6 +20,7 @@
 		1CBB8AC71EAF820B000C3ABF /* UIImageView+SDWebImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CBB8AB41EAF820B000C3ABF /* UIImageView+SDWebImage.m */; };
 		1CBB8AC81EAF820B000C3ABF /* UIView+Frame.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CBB8AB61EAF820B000C3ABF /* UIView+Frame.m */; };
 		1CBB8AC91EAF820B000C3ABF /* XmppCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CBB8ABB1EAF820B000C3ABF /* XmppCenter.m */; };
+		1CBB8ACC1EAF82B8000C3ABF /* FriendCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CBB8ACB1EAF82B8000C3ABF /* FriendCell.m */; };
 		29E8767B1EAF4A2F00F0E55F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29E8767A1EAF4A2F00F0E55F /* main.m */; };
 		29E8767E1EAF4A2F00F0E55F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 29E8767D1EAF4A2F00F0E55F /* AppDelegate.m */; };
 		29E876811EAF4A2F00F0E55F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 29E876801EAF4A2F00F0E55F /* ViewController.m */; };
@@ -74,6 +75,8 @@
 		1CBB8ABA1EAF820B000C3ABF /* XmppCenter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XmppCenter.h; sourceTree = "<group>"; };
 		1CBB8ABB1EAF820B000C3ABF /* XmppCenter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XmppCenter.m; sourceTree = "<group>"; };
 		1CBB8ABC1EAF820B000C3ABF /* XMPPConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPConfig.h; sourceTree = "<group>"; };
+		1CBB8ACA1EAF82B8000C3ABF /* FriendCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendCell.h; sourceTree = "<group>"; };
+		1CBB8ACB1EAF82B8000C3ABF /* FriendCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendCell.m; sourceTree = "<group>"; };
 		29E876761EAF4A2F00F0E55F /* WeiIM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeiIM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		29E8767A1EAF4A2F00F0E55F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29E8767C1EAF4A2F00F0E55F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -223,6 +226,8 @@
 		1CBB8A9A1EAF820B000C3ABF /* View */ = {
 			isa = PBXGroup;
 			children = (
+				1CBB8ACA1EAF82B8000C3ABF /* FriendCell.h */,
+				1CBB8ACB1EAF82B8000C3ABF /* FriendCell.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -583,6 +588,7 @@
 				1CBB8AC11EAF820B000C3ABF /* VCFriend.m in Sources */,
 				1CBB8ABF1EAF820B000C3ABF /* VCNavBase.m in Sources */,
 				1CBB8AC91EAF820B000C3ABF /* XmppCenter.m in Sources */,
+				1CBB8ACC1EAF82B8000C3ABF /* FriendCell.m in Sources */,
 				1CBB8AC21EAF820B000C3ABF /* VCMessage.m in Sources */,
 				1CBB8AC31EAF820B000C3ABF /* VCMine.m in Sources */,
 			);

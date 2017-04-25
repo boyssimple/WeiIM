@@ -25,6 +25,7 @@
 #define RGB(r,g,b) RGBA(r,g,b,1)
 #define RGB3(v) RGB(v,v,v)
 #define APPCOLOR RGB(27,214,169)
+#define GrayColor RGB3(245)
 #define randomColor RGB(arc4random_uniform(256), arc4random_uniform(256), arc4random_uniform(256))
 
 
