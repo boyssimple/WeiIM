@@ -257,5 +257,11 @@
     return chatJID;
 }
 
+- (NSData*)getImageData:(NSString *)userId;
+{
+    XMPPJID *jid = [self getJIDWithUserId:userId];
+    NSData *photoData = [self.xmppAvatarModule photoDataForJID:jid];
+    return photoData;
+}
 
 @end

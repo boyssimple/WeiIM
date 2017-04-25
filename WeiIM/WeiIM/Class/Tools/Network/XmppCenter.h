@@ -55,4 +55,8 @@ typedef NS_ENUM(NSInteger, ConnectToServerPurpose)
 - (void)registerWithUser:(XMPPJID *)jid password:(NSString *)password withSuccess:(SuccessBlock)sblock withFail:(FailureBlock)fblock;
 //根据userid返回xmppjid
 - (XMPPJID*)getJIDWithUserId:(NSString *)userId;
+//下线
+- (void)goOffLine;
+//根据userid获取头像
+- (NSData*)getImageData:(NSString *)userId;
 @end

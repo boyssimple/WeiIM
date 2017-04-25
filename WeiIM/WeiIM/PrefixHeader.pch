@@ -21,5 +21,6 @@
 #import "XmppCenter.h"
 
 #import "VCBase.h"
+#import "UIView+Frame.h"
 
 #endif /* PrefixHeader_pch */
