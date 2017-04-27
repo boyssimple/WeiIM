@@ -23,12 +23,12 @@
     [super viewDidLoad];
     NSArray *childItemsArray = @[
                                  @{kClassKey  : @"VCMessage",
-                                   kTitleKey  : @"消息",
+                                   kTitleKey  : @"微聊",
                                    kImgKey    : @"TabMessageIcon",
                                    kSelImgKey : @"TabMessageIcon"},
                                  
                                  @{kClassKey  : @"VCFriend",
-                                   kTitleKey  : @"好友",
+                                   kTitleKey  : @"通讯录",
                                    kImgKey    : @"TabFriendIcon",
                                    kSelImgKey : @"TabFriendIcon"},
                                  
@@ -38,7 +38,7 @@
 //                                   kSelImgKey : @"TabDiscoverIcon"},
                                  
                                  @{kClassKey  : @"VCMine",
-                                   kTitleKey  : @"我的",
+                                   kTitleKey  : @"我",
                                    kImgKey    : @"TabMeIcon",
                                    kSelImgKey : @"TabMeIcon"} ];
     

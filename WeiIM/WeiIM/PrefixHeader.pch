@@ -19,7 +19,7 @@
 #import "Global.h"
 #import "UIImageView+SDWebImage.h"
 #import "XmppCenter.h"
-
+#import "Toast.h"
 #import "VCBase.h"
 #import "UIView+Frame.h"
 

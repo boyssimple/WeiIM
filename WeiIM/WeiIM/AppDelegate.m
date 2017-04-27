@@ -46,8 +46,8 @@
 
 - (void)autoLogin:(NSString*)phone withPwd:(NSString*)password{
     XMPPJID *jid = [[XmppCenter shareInstance] getJIDWithUserId:phone];
+    [XmppCenter shareInstance].myJid = jid;
     [[XmppCenter shareInstance] loginWithUser:jid withPwd:password withSuccess:^{
-        
     } withFail:^(NSString *error) {
         [self showLogin];
     }];

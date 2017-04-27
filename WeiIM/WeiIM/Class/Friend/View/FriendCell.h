@@ -9,5 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface FriendCell : UITableViewCell
+- (void)updateData:(XMPPUserMemoryStorageObject*)data;
+- (void)updateDataElse:(NSDictionary*)data;
 - (void)updateData;
 @end

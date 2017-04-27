@@ -20,7 +20,8 @@
 
 #define FONTSIZE 14
 
-//颜色
+
+/******************* 颜色 ********************/
 #define RGBA(r,g,b,a) [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:a]
 #define RGB(r,g,b) RGBA(r,g,b,1)
 #define RGB3(v) RGB(v,v,v)
@@ -35,11 +36,27 @@
 #pragma mark --------- 字体大小
 #define FONT(size) [UIFont systemFontOfSize:size]
 
-//XMPP 聊天
 
+/******************* XMPP 聊天 ********************/
 #define XMPP_HOST @"123.57.132.48"
+#define XMPP_GROUPSERVICE @"conference.123.57.132.48"
 #define XMPP_PLATFORM @"IOS"
 #define XMPP_TYPE_CHAT @"chat"                //消息类型chat、group
 #define XMPP_TYPE_GROUP @"group" 
+
+/******************* 通知 ********************/
+//好友列表通知
+#define XMPP_Friends_Change @"XMPP_Friends_Change"
+//群组
+#define XMPP_GET_GROUPS     @"XMPP_GET_GROUPS"
+
+
+typedef NS_ENUM(NSInteger, MessageType) {
+    MessageTypeText,//文字
+    MessageTypeImage, //图片
+    MessageTypeVideo,//视频
+    MessageTypeRecord,//语音
+    MessageTypeLocation//位置
+};
 
 #endif /* Global_h */

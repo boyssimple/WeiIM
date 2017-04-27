@@ -44,6 +44,7 @@ typedef NS_ENUM(NSInteger, ConnectToServerPurpose)
 
 @property (nonatomic, strong) XMPPJID  *myJid;
 @property (nonatomic, strong) NSString *userPassword;
+@property (nonatomic,strong)  NSMutableArray *friends;
 @property (nonatomic, copy)   SuccessBlock successBlack;
 @property (nonatomic, copy)   FailureBlock failureBlack;
 
@@ -59,4 +60,6 @@ typedef NS_ENUM(NSInteger, ConnectToServerPurpose)
 - (void)goOffLine;
 //根据userid获取头像
 - (NSData*)getImageData:(NSString *)userId;
+//添加好友
+- (void)addFriendById:(NSString*)name;
 @end

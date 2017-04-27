@@ -240,17 +240,53 @@
 //收到好友列表IQ会进入的方法，并且已经存入我的存储器
 - (void)xmppRosterDidEndPopulating:(XMPPRoster *)sender
 {
-//    [self changeFriend];
+    [self changeFriend];
 }
 
 // 如果不是初始化同步来的roster,那么会自动存入我的好友存储器
 - (void)xmppRosterDidChange:(XMPPRosterMemoryStorage *)sender
 {
-//    [self changeFriend];
+    [self changeFriend];
 }
 
 
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq{
+    NSLog(@"\niq:%@\n",iq.type);
+    NSLog(@"iqType:%@ %s %d",iq.type,__func__,__LINE__);
+    //    NSLog(@"%@",iq);
+    // 以下两个判断其实只需要有一个就够了
+    NSString *elementID = iq.elementID;
+    if (![elementID isEqualToString:@"getMyRooms"]) {
+        return YES;
+    }
+    
+    NSArray *results = [iq elementsForXmlns:@"http://jabber.org/protocol/disco#items"];
+    if (results.count < 1) {
+        return YES;
+    }
+    
+    NSMutableArray *array = [NSMutableArray array];
+    for (DDXMLElement *element in iq.children) {
+        if ([element.name isEqualToString:@"query"]) {
+            for (DDXMLElement *item in element.children) {
+                if ([item.name isEqualToString:@"item"]) {
+                    [array addObject:item];          //array  就是你的群列表
+                }
+            }
+        }
+    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:XMPP_GET_GROUPS object:array];
+    return YES;
+}
+
 #pragma mark - Event 
+
+-(void)changeFriend{
+    NSMutableArray *array = [NSMutableArray arrayWithArray:self.xmppRosterMemoryStorage.unsortedUsers];
+    self.friends = [array mutableCopy];
+    [[NSNotificationCenter defaultCenter] postNotificationName:XMPP_Friends_Change object:nil];
+}
+
 - (XMPPJID*)getJIDWithUserId:(NSString *)userId{
     NSString *baseStr = [NSString stringWithFormat:@"%@@%@/%@",userId,XMPP_HOST,XMPP_PLATFORM];
     XMPPJID *chatJID = [XMPPJID jidWithString:baseStr];
@@ -264,4 +300,9 @@
     return photoData;
 }
 
+- (void)addFriendById:(NSString*)name
+{
+    XMPPJID *jid = [XMPPJID jidWithString:name];
+    [self.xmppRoster addUser:jid withNickname:name];
+}
 @end
