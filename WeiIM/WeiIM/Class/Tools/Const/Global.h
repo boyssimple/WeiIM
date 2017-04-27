@@ -27,7 +27,7 @@
 #define RGB3(v) RGB(v,v,v)
 #define APPCOLOR RGB(27,214,169)
 #define GrayColor RGB3(245)
-#define randomColor RGB(arc4random_uniform(256), arc4random_uniform(256), arc4random_uniform(256))
+#define randomColor [UIColor colorWithRed:(arc4random_uniform(254)/255.0) green:(arc4random_uniform(254)/255.0) blue:(arc4random_uniform(254)/255.0) alpha:1]
 
 
 #pragma mark --------- 图片

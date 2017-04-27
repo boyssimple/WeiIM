@@ -80,13 +80,18 @@
     return self;
 }
 
-- (void)recordUpAction{
-
-}
-
 - (void)recordDownAction{
-    
+    if ([self.delegate respondsToSelector:@selector(inputText:clickedButtonAtIndex:withType:)]) {
+        [self.delegate inputText:self clickedButtonAtIndex:1 withType:2];
+    }
 }
+
+- (void)recordUpAction{
+    if ([self.delegate respondsToSelector:@selector(inputText:clickedButtonAtIndex:withType:)]) {
+        [self.delegate inputText:self clickedButtonAtIndex:2 withType:2];
+    }
+}
+
 
 - (void)recordKeyboardChange{
     if (self.type == RECORD) {

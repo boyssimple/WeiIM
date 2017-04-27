@@ -7,7 +7,13 @@
 //
 
 #import "VCBase.h"
-
+#import <AVFoundation/AVFoundation.h>
 @interface VCChat : VCBase
 @property (nonatomic, strong) XMPPJID *userJid;
+
+//录音
+@property (nonatomic, strong) NSURL *url;
+@property (nonatomic, strong) AVAudioRecorder *recorder;
+@property (nonatomic, strong) AVAudioPlayer *player;
+@property (nonatomic, strong) NSData *recordData;
 @end

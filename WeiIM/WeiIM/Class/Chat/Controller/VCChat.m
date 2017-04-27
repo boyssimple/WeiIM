@@ -11,7 +11,7 @@
 #import "InputTextBar.h"
 
 @interface VCChat ()<UITableViewDelegate,UITableViewDataSource,XMPPStreamDelegate,InputTextBarDelegate,
-    UIImagePickerControllerDelegate,UINavigationControllerDelegate>
+    UIImagePickerControllerDelegate,UINavigationControllerDelegate,ChatCellDelegate,AVAudioPlayerDelegate>
 @property (nonatomic, strong) UITableView *table;
 @property (nonatomic, strong) NSMutableArray *dataSource;
 @property (nonatomic, strong) InputTextBar *inputBar;
@@ -94,6 +94,76 @@
     [[XmppCenter shareInstance].xmppStream sendElement:message];
 }
 
+//录音开始
+-(void)recordDownAction{
+    NSError *error = nil;
+    
+    //激活AVAudioSession
+    AVAudioSession *session = [AVAudioSession sharedInstance];
+    [session setCategory:AVAudioSessionCategoryPlayAndRecord error:&error];
+    if (session != nil) {
+        [session setActive:YES error:nil];
+    }else {
+        NSLog(@"session error: %@",error);
+    }
+    
+    //设置AVAudioRecorder类的setting参数
+    NSDictionary *recorderSettings = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                      [NSNumber numberWithFloat:16000.0],AVSampleRateKey,
+                                      [NSNumber numberWithInt:kAudioFormatAppleIMA4],AVFormatIDKey,
+                                      [NSNumber numberWithInt:1],AVNumberOfChannelsKey,
+                                      [NSNumber numberWithInt:AVAudioQualityMax], AVEncoderAudioQualityKey,
+                                      nil];
+    
+    //实例化AVAudioRecorder对象
+    self.recorder = [[AVAudioRecorder alloc] initWithURL:self.url settings:recorderSettings error:&error];
+    if (error) {
+        NSLog(@"recorder error: %@", error);
+    }
+    //开始录音
+    [self.recorder record];
+}
+
+//录音完成
+-(void)recordUpAction{
+    [self.recorder stop];
+    self.recorder = nil;
+    AVURLAsset* audioAsset =[AVURLAsset URLAssetWithURL:self.url options:nil];
+    CMTime audioDuration = audioAsset.duration;
+    float audioDurationSeconds = CMTimeGetSeconds(audioDuration);
+    if (audioDurationSeconds >= 0.01) {
+        //录音完成发送
+        NSData *data = [[NSData alloc]initWithContentsOfURL:self.url];
+        [self sendRecordMessageWithData:data bodyName:@"[语音]" withTime:audioDurationSeconds];
+    }
+}
+
+/** 发送录音 */
+- (void)sendRecordMessageWithData:(NSData *)data bodyName:(NSString *)name withTime:(float)time
+{
+    
+    NSString *base64str = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+    XMPPMessage *message = [XMPPMessage messageWithType:XMPP_TYPE_CHAT to:self.userJid];
+    [message addAttributeWithName:@"bodyType" stringValue:[NSString stringWithFormat:@"%zi",MessageTypeRecord]];
+    [message addAttributeWithName:@"time" stringValue:[NSString stringWithFormat:@"%.f",ceilf(time)]];
+    [message addAttributeWithName:@"record" stringValue:base64str];
+    [message addBody:name];
+    [[XmppCenter shareInstance].xmppStream sendElement:message];
+    
+}
+
+- (void)playRecord:(NSString*)dataStr{
+    self.player = nil;
+    NSData *data = [[NSData alloc]initWithBase64EncodedString:dataStr options:NSDataBase64DecodingIgnoreUnknownCharacters];
+    if (data) {
+        self.recordData = data;
+        UInt32 sessionCategory = kAudioSessionCategory_MediaPlayback;
+        AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(sessionCategory), &sessionCategory);
+        UInt32 audioRouteOverride = kAudioSessionOverrideAudioRoute_Speaker;
+        AudioSessionSetProperty (kAudioSessionProperty_OverrideCategoryDefaultToSpeaker,sizeof (audioRouteOverride),&audioRouteOverride);
+        [self.player play];
+    }
+}
 
 #pragma mark - UITableViewDelegate
 
@@ -108,6 +178,8 @@
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     ChatCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ChatCell"];
+    cell.delegate = self;
+    cell.index = indexPath.row;
     XMPPMessageArchiving_Message_CoreDataObject *msg = [self.dataSource objectAtIndex:indexPath.row];
     [cell updateData:msg];
     return cell;
@@ -174,7 +246,11 @@
     if(type == 1){          //表情
     
     }else if(type == 2){    //语音
-        
+        if (buttonIndex == 1) {//录音
+            [self recordDownAction];
+        }else{                 //录音完成
+            [self recordUpAction];
+        }
     }else if(type == 3){    //功能
         if(buttonIndex == 1){
             [self selectImg];
@@ -206,6 +282,26 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+#pragma mark - ChatCellDelegate
+- (void)chatCell:(ChatCell *)chat clickIndex:(NSInteger)index withType:(NSInteger)type{
+    if (type == 1) {
+        XMPPMessageArchiving_Message_CoreDataObject *msg = [self.dataSource objectAtIndex:index];
+        NSString *chatType = [msg.message attributeStringValueForName:@"bodyType"];
+        if ([chatType integerValue] == MessageTypeRecord) {
+            NSString *record = [msg.message attributeStringValueForName:@"record"];
+            if(record){
+                [self playRecord:record];
+            }
+        }
+    }
+}
+
+#pragma mark - AVAudioPlayerDelegate
+
+- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag{
+    NSLog(@"%s",__func__);
+    self.player = nil;
+}
 
 #pragma mark - Getter Setter
 - (UITableView*)table{
@@ -226,5 +322,28 @@
        _inputBar.delegate = self;
     }
     return _inputBar;
+}
+
+- (NSURL*)url{
+    if (!_url) {
+        NSString *tmpDir = NSTemporaryDirectory();
+        NSString *urlPath = [tmpDir stringByAppendingString:@"record.caf"];
+        _url = [NSURL fileURLWithPath:urlPath];
+    }
+    return _url;
+}
+
+- (AVAudioPlayer *)player{
+    if (!_player) {
+        NSError *error = nil;
+        _player = [[AVAudioPlayer alloc] initWithData:self.recordData error:&error];//使用NSData创建
+        _player.volume = 1.0;
+        
+        _player.delegate = self;
+        if (error) {
+            NSLog(@"player error:%@",error);
+        }
+    }
+    return _player;
 }
 @end
