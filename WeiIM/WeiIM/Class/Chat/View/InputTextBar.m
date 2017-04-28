@@ -117,6 +117,10 @@
     faceView.hidden = NO;
     [self showFaceAnimation];
     self.type = FACE;
+    
+    if ([self.delegate respondsToSelector:@selector(clickChatCell:withOpen:)]) {
+        [self.delegate clickChatCell:self withOpen:YES];
+    }
 }
 
 - (void)selectImgAction{
@@ -135,9 +139,6 @@
     f.size.height += faceView.height;
     self.frame = f;
     
-//    if ([self.delegate respondsToSelector:@selector(handleHeight:)]) {
-//        [self.delegate handleHeight:faceView.height];
-//    }
     [UIView animateWithDuration:0.3 animations:^{
         self.transform = CGAffineTransformMakeTranslation(0, -faceView.height);
     }completion:^(BOOL finished) {
@@ -153,6 +154,10 @@
         self.transform = CGAffineTransformMakeTranslation(0, -funcView.height);
     }completion:^(BOOL finished) {
     }];
+    
+    if ([self.delegate respondsToSelector:@selector(clickChatCell:withOpen:)]) {
+        [self.delegate clickChatCell:self withOpen:YES];
+    }
 }
 
 - (void)hideFaceAndFunc{
@@ -165,6 +170,10 @@
         funcView.hidden = YES;
         faceView.hidden = YES;
     }];
+    
+    if ([self.delegate respondsToSelector:@selector(clickChatCell:withOpen:)]) {
+        [self.delegate clickChatCell:self withOpen:NO];
+    }
 }
 
 -(BOOL)textViewShouldBeginEditing:(UITextView *)textView{

@@ -10,6 +10,7 @@
 #import "VCMain.h"
 #import "VCLogin.h"
 #import "VCNavBase.h"
+#import <AMapFoundationKit/AMapFoundationKit.h>
 
 @interface AppDelegate ()
 
@@ -20,6 +21,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    [[AMapServices sharedServices] setEnableHTTPS:YES];
+    [AMapServices sharedServices].apiKey = @"8a8a8b9d95b0e5385028e790ca882760";
+    
     NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
     BOOL loginFlag = [user boolForKey:@"loginFlag"];
     NSString *userName = [user objectForKey:@"userName"];

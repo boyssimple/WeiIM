@@ -40,6 +40,6 @@ typedef enum{
 @protocol InputTextBarDelegate <NSObject>
 
 - (void)inputText:(InputTextBar *)bar clickedButtonAtIndex:(NSInteger)buttonIndex withType:(NSInteger)type;  //1-表情   2-语音   3-功能
-
+- (void)clickChatCell:(InputTextBar *)bar withOpen:(BOOL)open;
 - (void)sendMessage:(NSString*)message;
 @end

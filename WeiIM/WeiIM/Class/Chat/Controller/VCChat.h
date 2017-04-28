@@ -8,6 +8,12 @@
 
 #import "VCBase.h"
 #import <AVFoundation/AVFoundation.h>
+
+typedef NS_ENUM(NSUInteger,OPERATIONIMAGE) {
+    OPERATIONIMAGESELECT,
+    OPERATIONIMAGEMAKEPHOTO
+};
+
 @interface VCChat : VCBase
 @property (nonatomic, strong) XMPPJID *userJid;
 
@@ -16,4 +22,5 @@
 @property (nonatomic, strong) AVAudioRecorder *recorder;
 @property (nonatomic, strong) AVAudioPlayer *player;
 @property (nonatomic, strong) NSData *recordData;
+@property (nonatomic, assign) OPERATIONIMAGE operation;
 @end

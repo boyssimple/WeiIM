@@ -9,16 +9,27 @@
 #import "VCChat.h"
 #import "ChatCell.h"
 #import "InputTextBar.h"
+#import "VCMap.h"
+#import "VCNavBase.h"
+#import "MapInfo.h"
+#import "VCMapShow.h"
 
 @interface VCChat ()<UITableViewDelegate,UITableViewDataSource,XMPPStreamDelegate,InputTextBarDelegate,
     UIImagePickerControllerDelegate,UINavigationControllerDelegate,ChatCellDelegate,AVAudioPlayerDelegate>
 @property (nonatomic, strong) UITableView *table;
 @property (nonatomic, strong) NSMutableArray *dataSource;
 @property (nonatomic, strong) InputTextBar *inputBar;
+@property (nonatomic,strong) UIImagePickerController *imagePicker;
+@property (nonatomic,strong) UIImagePickerController *picker;
 
 @end
 
 @implementation VCChat
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillChangeFrameNotification object:nil];
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -32,6 +43,7 @@
     [self reloadMessages];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillChangeFrame:) name:UIKeyboardWillChangeFrameNotification object:nil];
 }
+
 
 #pragma mark - Events
 
@@ -78,9 +90,8 @@
 
 //选择图片
 - (void)selectImg{
-    UIImagePickerController *picker = [[UIImagePickerController alloc]init];
-    picker.delegate = self;
-    [self presentViewController:picker animated:YES completion:nil];
+    self.operation = OPERATIONIMAGESELECT;
+    [self presentViewController:self.picker animated:YES completion:nil];
 }
 
 /** 发送图片 */
@@ -152,6 +163,23 @@
     
 }
 
+/** 发送位置 */
+- (void)sendRecordMessageWithLocation:(MapInfo*)info;
+{
+    NSData *data = UIImagePNGRepresentation(info.img);
+    NSString *base64str = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+    XMPPMessage *message = [XMPPMessage messageWithType:XMPP_TYPE_CHAT to:self.userJid];
+    [message addAttributeWithName:@"bodyType" stringValue:[NSString stringWithFormat:@"%zi",MessageTypeLocation]];
+    [message addAttributeWithName:@"location" stringValue:[NSString stringWithFormat:@"%@",info.name]];
+    [message addAttributeWithName:@"address" stringValue:[NSString stringWithFormat:@"%@",info.address]];
+    [message addAttributeWithName:@"latitude" stringValue:[NSString stringWithFormat:@"%zi",info.latitude]];
+    [message addAttributeWithName:@"longitude" stringValue:[NSString stringWithFormat:@"%zi",info.longitude]];
+    [message addAttributeWithName:@"image" stringValue:base64str];
+    [message addBody:@"[位置]"];
+    [[XmppCenter shareInstance].xmppStream sendElement:message];
+    
+}
+
 - (void)playRecord:(NSString*)dataStr{
     self.player = nil;
     NSData *data = [[NSData alloc]initWithBase64EncodedString:dataStr options:NSDataBase64DecodingIgnoreUnknownCharacters];
@@ -163,6 +191,11 @@
         AudioSessionSetProperty (kAudioSessionProperty_OverrideCategoryDefaultToSpeaker,sizeof (audioRouteOverride),&audioRouteOverride);
         [self.player play];
     }
+}
+
+- (void)takePicture {
+    self.operation = OPERATIONIMAGEMAKEPHOTO;
+    [self presentViewController:self.imagePicker animated:YES completion:nil];
 }
 
 #pragma mark - UITableViewDelegate
@@ -252,16 +285,38 @@
             [self recordUpAction];
         }
     }else if(type == 3){    //功能
-        if(buttonIndex == 1){
+        if(buttonIndex == 1){//图片
             [self selectImg];
-        }else if(buttonIndex == 2){
+        }else if(buttonIndex == 2){//相机
+            [self takePicture];
+        }else if(buttonIndex == 3){//视频聊天
             
-        }else if(buttonIndex == 3){
-            
-        }else if(buttonIndex == 4){
-            
+        }else if(buttonIndex == 4){//位置
+            __weak __typeof (self)weakSelf = self;
+            VCMap *vc = [[VCMap alloc]initWithBlock:^(MapInfo *loc) {
+                [weakSelf sendRecordMessageWithLocation:loc];
+            }];
+            VCNavBase *nav = [[VCNavBase alloc]initWithRootViewController:vc];
+            [self presentViewController:nav animated:YES completion:nil];
         }
     }
+}
+
+- (void)clickChatCell:(InputTextBar *)bar withOpen:(BOOL)open{
+    CGFloat h = DEVICE_HEIGHT - NAV_STATUS_HEIGHT - [InputTextBar calHeight];
+    CGFloat hx = h - 200;
+    [UIView animateWithDuration:0.3 animations:^{
+        CGRect f = self.table.frame;
+        if(open){
+            f.size.height = hx;
+        }else{
+            f.size.height = h;
+        }
+        self.table.frame = f;
+    } completion:^(BOOL finished) {
+        
+    }];
+    [self scrollToBottom];
 }
 
 - (void)sendMessage:(NSString*)message{
@@ -273,14 +328,33 @@
     }
 }
 
+
 #pragma mark - UIImagePickerControllerDelegate
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    UIImage *image = info[UIImagePickerControllerOriginalImage];
-    NSData *data = UIImageJPEGRepresentation(image,0.3);
-    [self sendMessageWithData:data bodyName:@"[图片]"];
-    [self dismissViewControllerAnimated:YES completion:nil];
+    UIImage *image;
+    if (self.operation == OPERATIONIMAGEMAKEPHOTO) {
+        // 如果允许编辑则获得编辑后的照片，否则获取原始照片
+        if (self.imagePicker.allowsEditing) {
+            // 获取编辑后的照片
+            image = [info objectForKey:UIImagePickerControllerEditedImage];
+        }else{
+            // 获取原始照片
+            image = [info objectForKey:UIImagePickerControllerOriginalImage];
+        }
+    }else{
+        
+        image = info[UIImagePickerControllerEditedImage];
+    }
+    if (image) {
+        NSData *data = UIImageJPEGRepresentation(image,0.3);
+        [self sendMessageWithData:data bodyName:@"[图片]"];
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
+    [picker dismissViewControllerAnimated:YES completion:nil];
+    
 }
+
 
 #pragma mark - ChatCellDelegate
 - (void)chatCell:(ChatCell *)chat clickIndex:(NSInteger)index withType:(NSInteger)type{
@@ -292,6 +366,15 @@
             if(record){
                 [self playRecord:record];
             }
+        }else if([chatType integerValue] == MessageTypeLocation){
+            VCMapShow *vc = [[VCMapShow alloc]init];
+            CGFloat lon = [[msg.message attributeStringValueForName:@"longitude"]floatValue];
+            CGFloat lat = [[msg.message attributeStringValueForName:@"latitude"]floatValue];
+            MapInfo *info = [[MapInfo alloc]init];
+            info.longitude = lon;
+            info.latitude = lat;
+            vc.info = info;
+            [self.navigationController pushViewController:vc animated:YES];
         }
     }
 }
@@ -345,5 +428,38 @@
         }
     }
     return _player;
+}
+
+- (UIImagePickerController *)imagePicker{
+    if (!_imagePicker) {
+        _imagePicker = [[UIImagePickerController alloc]init];
+        // 判断现在可以获得多媒体的方式
+        if ([UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera]) {
+            // 设置image picker的来源，这里设置为摄像头
+            _imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+            // 设置使用哪个摄像头，这里设置为后置摄像头
+            _imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceRear;
+            _imagePicker.cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto;
+        }
+        else {
+            _imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        }
+        // 允许编辑
+        _imagePicker.allowsEditing = YES;
+        // 设置代理，检测操作
+        _imagePicker.delegate = self;
+    }
+    return _imagePicker;
+}
+
+- (UIImagePickerController*)picker{
+    if (!_picker) {
+        _picker = [[UIImagePickerController alloc]init];
+        // 允许编辑
+        _picker.allowsEditing=YES;
+        // 设置代理，检测操作
+        _picker.delegate=self;
+    }
+    return _picker;
 }
 @end

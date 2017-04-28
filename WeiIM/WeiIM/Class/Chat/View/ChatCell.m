@@ -21,6 +21,10 @@
 @property (nonatomic, strong) UILabel *lbRecord;    //语音消息
 @property(nonatomic,strong)UIImageView *ivRecord;   //语音消息图标
 @property(nonatomic,strong)UIView *vDot;            //未读红点
+
+@property (nonatomic, strong) UIView *vLocation;
+@property (nonatomic, strong) UILabel *lbLocation;    //位置
+@property (nonatomic,strong) UIImageView *ivLocation;   //位置
 @end
 @implementation ChatCell
 
@@ -85,6 +89,19 @@
     _vDot.layer.masksToBounds = YES;
     [self.contentView addSubview:_vDot];
     
+    _vLocation = [[UIView alloc]init];
+    _vLocation.hidden = YES;
+    [_container addSubview:_vLocation];
+    
+    _lbLocation = [UILabel new];
+    _lbLocation.font = FONT(10*RATIO_WIDHT320);
+    _lbLocation.textColor =  [UIColor blackColor];
+    [_vLocation addSubview:_lbLocation];
+    
+    _ivLocation = [[UIImageView alloc]init];
+    _ivLocation.userInteractionEnabled = YES;
+    _ivLocation.clipsToBounds = YES;
+    [_vLocation addSubview:_ivLocation];
 }
 
 -(void)updateData:(XMPPMessageArchiving_Message_CoreDataObject *)msg{
@@ -115,6 +132,7 @@
     self.lbRecord.hidden = YES;
     self.ivRecord.hidden = YES;
     self.vDot.hidden = YES;
+    self.vLocation.hidden = YES;
     
     if ([chatType integerValue] == MessageTypeText) {//文字
         self.lbContent.text = msg.body;
@@ -140,7 +158,18 @@
         self.lbRecord.text = [NSString stringWithFormat:@"%.f''",ceilf(time)];
         self.vDot.hidden = NO;
     }else if([chatType integerValue] == MessageTypeLocation){//位置
+        self.vLocation.hidden = NO;
         
+        __weak __typeof (self)weakSelf = self;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSString *imgBody = [msg.message attributeStringValueForName:@"image"];
+            NSData *data = [[NSData alloc]initWithBase64EncodedString:imgBody options:NSDataBase64DecodingIgnoreUnknownCharacters];
+            UIImage *calImage = [[UIImage alloc]initWithData:data];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf.ivLocation setImage:calImage];
+            });
+        });
+        self.lbLocation.text = [msg.message attributeStringValueForName:@"location"];
     }
     
     //sender-receiver处理
@@ -223,7 +252,26 @@
         h = [self.lbContent sizeThatFits:CGSizeMake(70, 14*RATIO_WIDHT320)].height;
         h += 20;
     }else if([chatType integerValue] == MessageTypeLocation){//位置
+        NSString *imgBody = [self.msg.message attributeStringValueForName:@"image"];
+        CGSize size = [ChatCell calSize:imgBody];
         
+        r = self.lbLocation.frame;
+        r.origin.x = 15;
+        r.origin.y = 5;
+        r.size.width = size.width - 30;
+        r.size.height = 10*RATIO_WIDHT320;
+        self.lbLocation.frame = r;
+        
+        r = self.ivLocation.frame;
+        r.origin.x = 11;
+        r.origin.y = self.lbLocation.bottom+5;
+        r.size.width = size.width-20;
+        r.size.height = size.height-5;
+        self.ivLocation.frame = r;
+        
+        w = size.width;
+        h = self.ivLocation.y + size.height;
+        self.container.layer.mask = self.maskViewImage.layer;
     }
     
     r = self.containerImageView.frame;
@@ -280,6 +328,10 @@
         r = self.ivRecord.frame;
         r.origin.x = self.container.width - r.size.width - 15;
         self.ivRecord.frame = r;
+        
+        r = self.ivLocation.frame;
+        r.origin.x = 9;
+        self.ivLocation.frame = r;
     }
 }
 
@@ -318,7 +370,11 @@
         h = [lbContent sizeThatFits:CGSizeMake(70, 14*RATIO_WIDHT320)].height;
         height = h + 35;
     }else if([chatType integerValue] == MessageTypeLocation){//位置
-        
+        NSString *imgBody = [msg.message attributeStringValueForName:@"image"];
+        CGSize size = [ChatCell calSize:imgBody];
+        w = size.width;
+        h = size.height + 15 + 10*RATIO_WIDHT320;
+        height = h+15;
     }
     
     

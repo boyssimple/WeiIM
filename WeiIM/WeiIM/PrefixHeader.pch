@@ -22,5 +22,5 @@
 #import "Toast.h"
 #import "VCBase.h"
 #import "UIView+Frame.h"
-
+#import "UIView+Screenshot.h"
 #endif /* PrefixHeader_pch */
